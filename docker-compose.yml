@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    # Не экспортируем порт, только для внутреннего использования caddy
+    expose:
+      - "80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    expose:
+      - "8000"
+    environment:
+      - SERVER_TIMEZONE=${SERVER_TIMEZONE:-UTC}
+      - NODE_SERVICE_URL=http://nodejs:3001
+      - PYTHONUNBUFFERED=${PYTHONUNBUFFERED:-1}
+      - DEFAULT_LATITUDE=${DEFAULT_LATITUDE:-51.4769}
+      - DEFAULT_LONGITUDE=${DEFAULT_LONGITUDE:-0.0005}
+    volumes:
+      # Для разработки - монтируем код, в production можно убрать
+      - ./backend:/app
+    networks:
+      - app-network
+    depends_on:
+      - nodejs
+
+  nodejs:
+    build:
+      context: ./nodejs
+      dockerfile: Dockerfile
+    expose:
+      - "3001"
+    networks:
+      - app-network
+
+  caddy:
+    image: caddy:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

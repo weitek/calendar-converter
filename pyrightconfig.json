@@ -1,0 +1,17 @@
+{
+  "include": ["backend"],
+  "exclude": ["**/__pycache__", "**/node_modules", "**/.venv"],
+  "venvPath": ".",
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "basic",
+  "reportMissingImports": "error",
+  "reportMissingTypeStubs": false,
+  "reportUnknownMemberType": "warning",
+  "reportUnknownVariableType": "warning",
+  "reportUnknownParameterType": "warning",
+  "reportReturnType": "warning",
+  "reportCallInDefaultInitializer": "none",
+  "reportUnusedCallResult": "none",
+  "autoImportCompletions": true,
+  "indexing": true
+}
