@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   frontend:
     build:
@@ -46,7 +44,6 @@ services:
     image: caddy:alpine
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data

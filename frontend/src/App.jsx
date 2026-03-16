@@ -14,7 +14,8 @@ function App() {
     const saved = localStorage.getItem('calendarSettings');
     return saved ? JSON.parse(saved) : {
       dateFormat: 'dd.mm.yyyy',
-      coordinates: { lat: 51.4769, lng: 0.0005 }
+      coordinates: { lat: 51.4769, lng: 0.0005 },
+      language: 'ru'
     };
   });
   const [showSummary, setShowSummary] = useState(false);
@@ -34,9 +35,13 @@ function App() {
     }
   }, [activeSource, activeTarget]);
 
+  useEffect(() => {
+    loadWidgets();
+  }, [settings.language]);
+
   const loadWidgets = async () => {
     try {
-      const data = await fetchWidgets();
+      const data = await fetchWidgets(settings.language);
       setWidgets(data);
       
       // Initialize dates
@@ -75,7 +80,7 @@ function App() {
       }
 
       try {
-        const result = await convertDate(activeSource, widget.id, sourceDate, settings.coordinates);
+        const result = await convertDate(activeSource, widget.id, sourceDate, settings.coordinates, settings.language);
         newDates[widget.id] = result;
       } catch (error) {
         console.error(`Error converting to ${widget.id}:`, error);
@@ -107,16 +112,21 @@ function App() {
 
     if (calendarId === 'lunar_phase') {
       if (!date.phase) return '--';
-      return `${date.lunar_day} день, ${date.phase}`;
+      return `${date.lunar_day} ${date.phase}`;
     }
 
     return formatDate(date.day, date.month, date.year, settings.dateFormat);
   };
 
+  const labels = {
+    ru: { loading: 'Загрузка...', recalculate: 'Пересчитать' },
+    en: { loading: 'Loading...', recalculate: 'Recalculate' }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-xl">Загрузка...</div>
+        <div className="text-xl">{labels[settings.language]?.loading || labels.ru.loading}</div>
       </div>
     );
   }
@@ -144,6 +154,7 @@ function App() {
               onSetTarget={() => setActiveTarget(widget.id)}
               displayDate={getDisplayDate(widget.id)}
               additionalData={dates[widget.id]}
+              language={settings.language}
             />
           ))}
         </div>
@@ -153,7 +164,7 @@ function App() {
             onClick={handleRecalculate}
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow transition-colors"
           >
-            Пересчитать
+            {labels[settings.language]?.recalculate || labels.ru.recalculate}
           </button>
         </div>
       </main>

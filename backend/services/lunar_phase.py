@@ -1,6 +1,8 @@
 from typing import List, Dict, Any, Optional
 import math
 
+from services.i18n import translate_phase
+
 
 # Synodic month (лунный месяц) в днях
 SYNODIC_MONTH = 29.53058867
@@ -14,7 +16,8 @@ def get_lunar_phase(
     month: int, 
     year: int,
     latitude: Optional[float] = None,
-    longitude: Optional[float] = None
+    longitude: Optional[float] = None,
+    language: str = "ru"
 ) -> List[Dict[str, Any]]:
     """
     Рассчитывает лунную фазу для заданной даты.
@@ -37,6 +40,7 @@ def get_lunar_phase(
         # Вычисляем угол фазы (0-360)
         phase_angle = (days_since_new_moon / SYNODIC_MONTH) * 360
         phase_name = get_phase_name(phase_angle)
+        phase_name_translated = translate_phase(phase_name, language)
         
         # Вычисляем процент освещённости
         illumination = (1 - math.cos(math.radians(phase_angle))) / 2 * 100
@@ -45,17 +49,20 @@ def get_lunar_phase(
         days_to_next = SYNODIC_MONTH - days_since_new_moon
         next_jd = jd + days_to_next
         next_phase_type = get_next_phase_type(phase_name)
+        next_phase_type_translated = translate_phase(next_phase_type, language)
         
         results.append({
             "source": "astronomical_calculations",
             "value": {
                 "jd": jd,
                 "lunar_day": lunar_day,
-                "phase": phase_name,
+                "phase": phase_name_translated,
+                "phase_original": phase_name,
                 "phase_angle": round(phase_angle, 2),
                 "illumination": round(illumination, 2),
                 "next_phase": {
-                    "type": next_phase_type,
+                    "type": next_phase_type_translated,
+                    "type_original": next_phase_type,
                     "time_utc": format_jd(next_jd),
                     "jd": next_jd
                 }
@@ -143,10 +150,11 @@ def get_lunar_phase_simple(
     month: int, 
     year: int,
     latitude: Optional[float] = None,
-    longitude: Optional[float] = None
+    longitude: Optional[float] = None,
+    language: str = "ru"
 ) -> Dict[str, Any]:
     """Упрощённый расчёт лунной фазы."""
-    results = get_lunar_phase(day, month, year, latitude, longitude)
+    results = get_lunar_phase(day, month, year, latitude, longitude, language)
     
     if results and results[0].get('value'):
         return results[0]['value']

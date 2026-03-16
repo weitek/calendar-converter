@@ -8,8 +8,41 @@ function CalendarWidget({
   onSetSource,
   onSetTarget,
   displayDate,
-  additionalData
+  additionalData,
+  language = 'ru'
 }) {
+  const labels = {
+    ru: {
+      asSource: 'Как источник',
+      asTarget: 'Как цель',
+      source: 'Источник',
+      target: 'Цель',
+      jd: 'JD',
+      lunarDay: 'Лунный день',
+      phase: 'Фаза',
+      illumination: 'Освещённость',
+      nextPhase: 'Следующая фаза',
+      day: 'День',
+      month: 'Месяц',
+      year: 'Год'
+    },
+    en: {
+      asSource: 'As source',
+      asTarget: 'As target',
+      source: 'Source',
+      target: 'Target',
+      jd: 'JD',
+      lunarDay: 'Lunar Day',
+      phase: 'Phase',
+      illumination: 'Illumination',
+      nextPhase: 'Next Phase',
+      day: 'Day',
+      month: 'Month',
+      year: 'Year'
+    }
+  };
+
+  const l = labels[language] || labels.ru;
   const handleInputChange = (field, value) => {
     const numValue = parseInt(value) || 0;
     onDateChange({
@@ -31,7 +64,7 @@ function CalendarWidget({
               onClick={onSetSource}
               className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 px-2 py-1 rounded"
             >
-              Как источник
+              {l.asSource}
             </button>
           )}
           {!isTarget && widget.supported_directions.includes('to') && (
@@ -39,7 +72,7 @@ function CalendarWidget({
               onClick={onSetTarget}
               className="text-xs bg-green-100 hover:bg-green-200 text-green-800 px-2 py-1 rounded"
             >
-              Как цель
+              {l.asTarget}
             </button>
           )}
         </div>
@@ -48,24 +81,24 @@ function CalendarWidget({
       {widget.id === 'lunar_phase' && additionalData ? (
         <div className="space-y-2">
           <div className="text-sm">
-            <span className="text-gray-600">JD: </span>
+            <span className="text-gray-600">{l.jd}: </span>
             <span className="font-mono">{additionalData.jd?.toFixed(5) || '--'}</span>
           </div>
           <div className="text-sm">
-            <span className="text-gray-600">Лунный день: </span>
+            <span className="text-gray-600">{l.lunarDay}: </span>
             <span className="font-semibold">{additionalData.lunar_day || '--'}</span>
           </div>
           <div className="text-sm">
-            <span className="text-gray-600">Фаза: </span>
+            <span className="text-gray-600">{l.phase}: </span>
             <span className="font-semibold">{additionalData.phase || '--'}</span>
           </div>
           <div className="text-sm">
-            <span className="text-gray-600">Освещённость: </span>
+            <span className="text-gray-600">{l.illumination}: </span>
             <span>{additionalData.illumination?.toFixed(1) || '--'}%</span>
           </div>
           {additionalData.next_phase && (
             <div className="text-sm mt-2 pt-2 border-t">
-              <span className="text-gray-600">Следующая фаза: </span>
+              <span className="text-gray-600">{l.nextPhase}: </span>
               <div className="font-semibold">{additionalData.next_phase.type}</div>
               <div className="text-xs text-gray-500">
                 {additionalData.next_phase.time_utc || '--'}
@@ -87,7 +120,7 @@ function CalendarWidget({
                 max="31"
                 value={date?.day || ''}
                 onChange={(e) => handleInputChange('day', e.target.value)}
-                placeholder="День"
+                placeholder={l.day}
                 className="w-20 p-2 border border-gray-300 rounded text-center"
               />
               <input
@@ -96,7 +129,7 @@ function CalendarWidget({
                 max="12"
                 value={date?.month || ''}
                 onChange={(e) => handleInputChange('month', e.target.value)}
-                placeholder="Месяц"
+                placeholder={l.month}
                 className="w-20 p-2 border border-gray-300 rounded text-center"
               />
               <input
@@ -104,7 +137,7 @@ function CalendarWidget({
                 min="1"
                 value={date?.year || ''}
                 onChange={(e) => handleInputChange('year', e.target.value)}
-                placeholder="Год"
+                placeholder={l.year}
                 className="flex-1 p-2 border border-gray-300 rounded text-center"
               />
             </div>
@@ -118,12 +151,12 @@ function CalendarWidget({
 
       {isSource && (
         <div className="mt-2 text-xs text-blue-600 text-center">
-          Источник
+          {l.source}
         </div>
       )}
       {isTarget && (
         <div className="mt-2 text-xs text-green-600 text-center">
-          Цель
+          {l.target}
         </div>
       )}
     </div>

@@ -38,6 +38,7 @@ class LunarPhaseRequestModel(BaseModel):
     year: int = Field(..., gt=0)
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    language: Optional[str] = "ru"
 
 class ResultWithSource(BaseModel):
     """Результат с указанием источника"""

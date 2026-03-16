@@ -1,14 +1,14 @@
 const API_BASE = '/api';
 
-export async function fetchWidgets() {
-  const response = await fetch(`${API_BASE}/widgets`);
+export async function fetchWidgets(language = 'ru') {
+  const response = await fetch(`${API_BASE}/widgets?lang=${language}`);
   if (!response.ok) {
     throw new Error('Failed to fetch widgets');
   }
   return response.json();
 }
 
-export async function convertDate(sourceId, targetId, date, coordinates = {}) {
+export async function convertDate(sourceId, targetId, date, coordinates = {}, language = 'ru') {
   let endpoint = '';
   let payload = {};
 
@@ -55,7 +55,8 @@ export async function convertDate(sourceId, targetId, date, coordinates = {}) {
       month: date.month,
       year: date.year,
       latitude: coordinates.lat,
-      longitude: coordinates.lng
+      longitude: coordinates.lng,
+      language: language
     };
   } else if (sourceId === 'gregorian') {
     // Прямая конвертация из gregorian в целевой календарь
@@ -76,6 +77,7 @@ export async function convertDate(sourceId, targetId, date, coordinates = {}) {
         endpoint = '/convert/to-lunar-phase';
         payload.latitude = coordinates.lat;
         payload.longitude = coordinates.lng;
+        payload.language = language;
         break;
       default:
         throw new Error(`Unknown target: ${targetId}`);
@@ -134,7 +136,7 @@ export async function convertDate(sourceId, targetId, date, coordinates = {}) {
     }
     
     // Теперь конвертируем из gregorian в target
-    return convertDate('gregorian', targetId, gregorianDate, coordinates);
+    return convertDate('gregorian', targetId, gregorianDate, coordinates, language);
   }
 
   const response = await fetch(`${API_BASE}${endpoint}`, {
@@ -164,7 +166,7 @@ export async function convertDate(sourceId, targetId, date, coordinates = {}) {
   throw new Error('No results returned');
 }
 
-export async function getLunarPhase(day, month, year, coordinates = {}) {
+export async function getLunarPhase(day, month, year, coordinates = {}, language = 'ru') {
   const response = await fetch(`${API_BASE}/convert/to-lunar-phase`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -173,7 +175,8 @@ export async function getLunarPhase(day, month, year, coordinates = {}) {
       month,
       year,
       latitude: coordinates.lat,
-      longitude: coordinates.lng
+      longitude: coordinates.lng,
+      language: language
     })
   });
 

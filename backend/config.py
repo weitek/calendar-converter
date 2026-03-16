@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: List[str] = ["*"]
     DEFAULT_LATITUDE: float = 51.4769
     DEFAULT_LONGITUDE: float = 0.0005
+    DEFAULT_LANGUAGE: str = "ru"
 
     class Config:
         env_file = ".env"

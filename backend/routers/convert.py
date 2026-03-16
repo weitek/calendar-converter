@@ -84,14 +84,15 @@ async def convert_to_lunar_phase(data: LunarPhaseRequestModel) -> List[Dict[str,
     """
     Рассчитывает лунную фазу для заданной григорианской даты.
     """
-    # Используем координаты по умолчанию, если не переданы
     latitude = data.latitude if data.latitude is not None else settings.DEFAULT_LATITUDE
     longitude = data.longitude if data.longitude is not None else settings.DEFAULT_LONGITUDE
+    language = data.language if data.language else settings.DEFAULT_LANGUAGE
     
     return lunar_phase.get_lunar_phase(
         data.day, 
         data.month, 
         data.year,
         latitude,
-        longitude
+        longitude,
+        language
     )
