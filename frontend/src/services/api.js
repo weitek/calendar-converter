@@ -12,8 +12,28 @@ export async function convertDate(sourceId, targetId, date, coordinates = {}, la
   let endpoint = '';
   let payload = {};
 
-  // Определяем endpoint и payload в зависимости от направления конвертации
-  if (targetId === 'julian') {
+  // Конвертация из Julian Day в другие календари
+  if (sourceId === 'julian_day') {
+    const jdValue = typeof date === 'number' ? date : date.jd;
+    if (targetId === 'gregorian') {
+      endpoint = '/convert/from-jd';
+      payload = { jd: jdValue };
+    } else {
+      // Сначала конвертируем JD в gregorian
+      const response = await fetch(`${API_BASE}/convert/from-jd`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jd: jdValue })
+      });
+      const results = await response.json();
+      const gregorianDate = results[0]?.value;
+      if (!gregorianDate) {
+        throw new Error('Failed to convert from JD');
+      }
+      // Теперь конвертируем из gregorian в target
+      return convertDate('gregorian', targetId, gregorianDate, coordinates, language);
+    }
+  } else if (targetId === 'julian') {
     endpoint = '/convert/to-julian';
     payload = {
       day: date.day,

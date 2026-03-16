@@ -8,12 +8,14 @@ function SummaryModal({ dates, widgets, settings, onClose }) {
     if (!date) return '--';
 
     if (widgetId === 'julian_day') {
-      return date.jd ? date.jd.toFixed(5) : '--';
+      const jdValue = typeof date === 'number' ? date : date.jd;
+      return jdValue ? jdValue.toFixed(5) : '--';
     }
 
     if (widgetId === 'lunar_phase') {
       if (!date.phase) return '--';
-      return `JD: ${date.jd?.toFixed(2) || '--'}, День: ${date.lunar_day}, Фаза: ${date.phase}`;
+      const jdValue = typeof date === 'object' && date !== null ? date.jd : '--';
+      return `JD: ${jdValue !== '--' ? jdValue.toFixed(2) : '--'}, День: ${date.lunar_day}, Фаза: ${date.phase}`;
     }
 
     if (!date.day) return '--';

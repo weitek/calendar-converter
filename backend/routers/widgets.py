@@ -45,13 +45,13 @@ def get_widgets_config(language: str = "ru") -> List[Dict[str, Any]]:
             "name": widget_names["julian_day"],
             "fields": ["jd"],
             "input_format": "jd",
-            "supported_directions": ["to"]
+            "supported_directions": ["from"]
         },
         {
             "id": "lunar_phase",
             "name": widget_names["lunar_phase"],
-            "fields": [],
-            "input_format": None,
+            "fields": ["day", "month", "year"],
+            "input_format": "gregorian",
             "supported_directions": ["to"]
         }
     ]

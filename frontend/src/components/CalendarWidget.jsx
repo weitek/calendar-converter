@@ -44,14 +44,28 @@ function CalendarWidget({
 
   const l = labels[language] || labels.ru;
   const handleInputChange = (field, value) => {
-    const numValue = parseInt(value) || 0;
-    onDateChange({
-      ...date,
-      [field]: numValue
-    });
+    if (field === 'jd') {
+      if (value === '') {
+        onDateChange({ jd: 0 });
+      } else {
+        const numValue = parseFloat(value);
+        onDateChange({ jd: isNaN(numValue) ? 0 : numValue });
+      }
+    } else {
+      if (value === '') {
+        onDateChange({ ...date, [field]: 0 });
+      } else {
+        const numValue = parseInt(value, 10);
+        onDateChange({
+          ...date,
+          [field]: isNaN(numValue) ? 0 : numValue
+        });
+      }
+    }
   };
 
-  const canInput = isSource && widget.fields.length > 0 && widget.id !== 'julian_day' && widget.id !== 'lunar_phase';
+  const canInput = isSource && widget.fields.length > 0;
+  const canBeTarget = widget.supported_directions.includes('to');
 
   return (
     <div className={`bg-white rounded-lg shadow-md p-4 ${isSource ? 'ring-2 ring-blue-500' : ''} ${isTarget ? 'ring-2 ring-green-500' : ''}`}>
@@ -67,7 +81,7 @@ function CalendarWidget({
               {l.asSource}
             </button>
           )}
-          {!isTarget && widget.supported_directions.includes('to') && (
+          {!isTarget && canBeTarget && (
             <button
               onClick={onSetTarget}
               className="text-xs bg-green-100 hover:bg-green-200 text-green-800 px-2 py-1 rounded"
@@ -78,7 +92,7 @@ function CalendarWidget({
         </div>
       </div>
 
-      {widget.id === 'lunar_phase' && additionalData ? (
+      {widget.id === 'lunar_phase' && additionalData && !isSource ? (
         <div className="space-y-2">
           <div className="text-sm">
             <span className="text-gray-600">{l.jd}: </span>
@@ -106,40 +120,56 @@ function CalendarWidget({
             </div>
           )}
         </div>
-      ) : widget.id === 'julian_day' && additionalData ? (
+      ) : widget.id === 'julian_day' && additionalData && !isSource ? (
         <div className="space-y-2">
-          <div className="text-2xl font-mono text-center">{additionalData.jd?.toFixed(5) || '--'}</div>
+          <div className="text-2xl font-mono text-center">
+            {typeof additionalData === 'number' ? additionalData.toFixed(5) : 
+             typeof additionalData === 'object' && additionalData !== null ? additionalData.jd?.toFixed(5) : '--'}
+          </div>
         </div>
       ) : (
         <>
           {canInput && (
             <div className="flex gap-2 mb-4">
-              <input
-                type="number"
-                min="1"
-                max="31"
-                value={date?.day || ''}
-                onChange={(e) => handleInputChange('day', e.target.value)}
-                placeholder={l.day}
-                className="w-20 p-2 border border-gray-300 rounded text-center"
-              />
-              <input
-                type="number"
-                min="1"
-                max="12"
-                value={date?.month || ''}
-                onChange={(e) => handleInputChange('month', e.target.value)}
-                placeholder={l.month}
-                className="w-20 p-2 border border-gray-300 rounded text-center"
-              />
-              <input
-                type="number"
-                min="1"
-                value={date?.year || ''}
-                onChange={(e) => handleInputChange('year', e.target.value)}
-                placeholder={l.year}
-                className="flex-1 p-2 border border-gray-300 rounded text-center"
-              />
+              {widget.id === 'julian_day' ? (
+                <input
+                  type="number"
+                  min="0"
+                  value={date?.jd || ''}
+                  onChange={(e) => handleInputChange('jd', e.target.value)}
+                  placeholder="JD"
+                  className="w-full p-2 border border-gray-300 rounded text-center font-mono"
+                />
+              ) : (
+                <>
+                  <input
+                    type="number"
+                    min="1"
+                    max="31"
+                    value={date?.day || ''}
+                    onChange={(e) => handleInputChange('day', e.target.value)}
+                    placeholder={l.day}
+                    className="w-20 p-2 border border-gray-300 rounded text-center"
+                  />
+                  <input
+                    type="number"
+                    min="1"
+                    max="12"
+                    value={date?.month || ''}
+                    onChange={(e) => handleInputChange('month', e.target.value)}
+                    placeholder={l.month}
+                    className="w-20 p-2 border border-gray-300 rounded text-center"
+                  />
+                  <input
+                    type="number"
+                    min="1"
+                    value={date?.year || ''}
+                    onChange={(e) => handleInputChange('year', e.target.value)}
+                    placeholder={l.year}
+                    className="flex-1 p-2 border border-gray-300 rounded text-center"
+                  />
+                </>
+              )}
             </div>
           )}
           

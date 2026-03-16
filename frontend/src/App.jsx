@@ -39,6 +39,12 @@ function App() {
     loadWidgets();
   }, [settings.language]);
 
+  useEffect(() => {
+    if (!loading && widgets.length > 0 && dates[activeSource]) {
+      convertAll();
+    }
+  }, [loading]);
+
   const loadWidgets = async () => {
     try {
       const data = await fetchWidgets(settings.language);
@@ -46,14 +52,18 @@ function App() {
       
       // Initialize dates
       const initialDates = {};
+      const today = new Date();
+      const todayJD = Math.floor((today.getTime() / 86400000) + 2440587.5);
+      
       data.forEach(w => {
         if (w.id === 'gregorian') {
-          const today = new Date();
           initialDates[w.id] = {
             day: today.getDate(),
             month: today.getMonth() + 1,
             year: today.getFullYear()
           };
+        } else if (w.id === 'julian_day') {
+          initialDates[w.id] = { jd: todayJD };
         } else {
           initialDates[w.id] = null;
         }
@@ -75,6 +85,18 @@ function App() {
     for (const widget of widgets) {
       if (widget.id === activeSource) continue;
       if (widget.id === 'gregorian') {
+        // Для конвертации из julian_day нужно сначала получить gregorian дату
+        if (activeSource === 'julian_day') {
+          try {
+            const jdValue = typeof sourceDate === 'number' ? sourceDate : sourceDate.jd;
+            const result = await convertDate('julian_day', 'gregorian', { jd: jdValue }, settings.coordinates, settings.language);
+            newDates[widget.id] = result;
+          } catch (error) {
+            console.error('Error converting JD to gregorian:', error);
+            newDates[widget.id] = null;
+          }
+          continue;
+        }
         newDates[widget.id] = { ...sourceDate };
         continue;
       }
@@ -107,7 +129,7 @@ function App() {
     if (!date) return '--';
 
     if (calendarId === 'julian_day') {
-      return date.jd ? date.jd.toFixed(5) : '--';
+      return typeof date === 'number' ? date.toFixed(5) : (date.jd ? date.jd.toFixed(5) : '--');
     }
 
     if (calendarId === 'lunar_phase') {
